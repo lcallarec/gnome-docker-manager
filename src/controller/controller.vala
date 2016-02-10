@@ -1,14 +1,14 @@
 /*
- * ApplicationController is listening to all signals emitted by the view layer
+ * BaseApplicationController is listening to all signals emitted by the view layer
  */
-public class ApplicationController : GLib.Object {
+public abstract class BaseApplicationController : GLib.Object {
 
-    private Docker.Repository repository;
-    private Gtk.Window window;
-    private MessageDispatcher message_dispatcher;
-    private Ui.MainApplicationView view;
+    protected Docker.Repository repository;
+    protected Gtk.Window window;
+    protected MessageDispatcher message_dispatcher;
+    protected Ui.MainApplicationView view;
 
-    public ApplicationController(Gtk.Window window, Ui.MainApplicationView view, MessageDispatcher message_dispatcher) {
+    public BaseApplicationController(Gtk.Window window, Ui.MainApplicationView view, MessageDispatcher message_dispatcher) {
         this.message_dispatcher = message_dispatcher;
         this.view               = view;
         this.window             = window;
@@ -104,35 +104,7 @@ public class ApplicationController : GLib.Object {
         });
         
         view.containers.container_rename_request.connect((container, label) => {
-             
-            var pop = new Gtk.Popover(label);
-            pop.position = Gtk.PositionType.BOTTOM;
-             
-            var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-            box.margin = 5;
-            box.pack_start(new Gtk.Label("New name"), false, true, 5);
-             
-            var entry = new Gtk.Entry();
-            entry.set_text(label.get_text());
-            
-            box.pack_end(entry, false, true, 5);
-            
-            pop.add(box);
-             
-            entry.activate.connect (() => {
-                try {
-                    container.name = entry.text;
-                    
-                    repository.containers().rename(container);
-                    
-                    this.init_container_list();
-                    
-                } catch (Docker.IO.RequestError e) {
-                    message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) e.message);
-                }
-            });
-             
-            pop.show_all();
+            this.handle_container_rename(container, label);
         });
     }
 
@@ -188,4 +160,7 @@ public class ApplicationController : GLib.Object {
         
         return new Docker.Repository(client);
     }
+    
+    
+    protected abstract void handle_container_rename(Docker.Model.Container container, Gtk.Label label);
 }
