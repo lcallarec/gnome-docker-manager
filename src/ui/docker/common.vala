@@ -38,7 +38,7 @@ namespace Ui.Docker {
         /**
          * Init the container view from a given (nullable) list of containers and return it
          */
-        public abstract Ui.Docker.List.Containers init(Containers? containers, bool show_after_refresh = true);
+        public abstract Ui.Docker.List.BaseContainers init(Containers? containers, bool show_after_refresh = true);
     }
     
     public interface IconMessageBoxBuilder {

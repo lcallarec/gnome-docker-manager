@@ -73,7 +73,7 @@ namespace Ui.Docker.List {
                 Gtk.ListBoxRow row = new Gtk.ListBoxRow();
 
                 //For Gtk 3.14+ only
-                row.set_selectable(false);
+                //row.set_selectable(false);
 
                 Gtk.Grid row_layout = new Gtk.Grid();
                 row.add(row_layout);
