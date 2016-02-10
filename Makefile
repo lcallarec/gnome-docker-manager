@@ -1,3 +1,8 @@
+SHELL := /bin/bash
+
+gtk_version := $(shell pkg-config --modversion gtk+-3.0 | cut -d'.' -f1,2)
+vala_src_files := $(shell build/get_vala_src_files $(gtk_version))
+
 EXEC=gnome-docker-file
 
 all: $(EXEC)
@@ -8,8 +13,7 @@ gnome-docker-file:
         -X -lm \
         --pkg gtk+-3.0 --pkg libsoup-2.4 --pkg gio-2.0 \
         --pkg gio-unix-2.0 --pkg gee-0.8 --pkg json-glib-1.0 \
-        src/*.vala src/docker/*.vala src/ui/*.vala  src/ui/docker/*.vala src/ui/docker/list/*.vala \
-        resources.c --gresources gnome-docker-manager.gresource.xml \
+        $(vala_src_files) resources.c --gresources gnome-docker-manager.gresource.xml \
         -o gdocker
         
 install:
@@ -28,3 +32,4 @@ install-desktop-entry:
     
 clean:
 	find . -type f -name '*.c' -delete && rm gdocker
+

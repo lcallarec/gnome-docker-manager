@@ -3,7 +3,7 @@ namespace Ui.Docker.List {
     using global::Docker.Model;
         
    
-    public class Containers : Flushable, ContainerViewable, ContainerActionable, Gtk.Box {
+    public abstract class BaseContainers : Flushable, ContainerViewable, ContainerActionable, Gtk.Box {
 
         protected Gtk.Notebook notebook;
         protected Gtk.Box empty_box;
@@ -11,7 +11,7 @@ namespace Ui.Docker.List {
         /**
          * Init the container view from a given (nullable) list of containers and return it
          */ 
-        public Containers init(global::Docker.Model.Containers? containers, bool show_after_refresh = true) {
+        public BaseContainers init(global::Docker.Model.Containers? containers, bool show_after_refresh = true) {
             
             this.flush();
             
@@ -54,8 +54,7 @@ namespace Ui.Docker.List {
 
                 Gtk.ListBoxRow row = new Gtk.ListBoxRow();
 
-                //For Gtk 3.14+ only
-                row.set_selectable(false);
+                this.decorate_row(row);
 
                 Gtk.Grid row_layout = new Gtk.Grid();
                 row_layout.column_spacing = 5;
@@ -124,6 +123,11 @@ namespace Ui.Docker.List {
                 this.remove(this.notebook);
             }
         }
+        
+        /**
+         * Decorate the row for specific gtk3+ versions
+         */ 
+        protected abstract void decorate_row(Gtk.ListBoxRow row);
 
         private Gtk.Button create_button_stop_start(bool is_active, Container container) {
 

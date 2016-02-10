@@ -1,0 +1,20 @@
+#!/bin/bash
+GTK_VERSION=$1
+
+BASE_VALA_SRC_FILES="src/*.vala src/controller/*.vala src/docker/*.vala src/ui/*.vala  src/ui/docker/*.vala src/ui/docker/list/*.vala"
+
+case $GTK_VERSION in
+    "3.10" | "3.11" | "3.12" | "3.13" )
+        BASE_VALA_SRC_FILES="$BASE_VALA_SRC_FILES src/ui/docker/list/3.10/*.vala" ;;
+    "3.14" | "3.15" | "3.16" | "3.17" | "3.18" )
+        BASE_VALA_SRC_FILES="$BASE_VALA_SRC_FILES src/ui/docker/list/3.14/*.vala" ;;
+esac
+
+case $GTK_VERSION in
+    "3.10" | "3.11" )
+        BASE_VALA_SRC_FILES="$BASE_VALA_SRC_FILES src/controller/3.10/*.vala" ;;
+    "3.12" | "3.13" | "3.14" | "3.15" | "3.16" | "3.17" | "3.18" )
+        BASE_VALA_SRC_FILES="$BASE_VALA_SRC_FILES src/controller/3.12/*.vala" ;;
+esac
+
+echo $BASE_VALA_SRC_FILES
