@@ -164,29 +164,34 @@ public class ApplicationController : GLib.Object {
 
     public void listen_image_view() {
 
-         view.images.image_remove_request.connect((image) => {
+         view.images.images_remove_request.connect((images) => {
 
-            Sdk.Docker.Model.ContainerCollection linked_containers = this.repository.containers().find_by_image(image);
+            /** Find containers created from the images we want to remove */
 
-            var dialog = new View.Docker.Dialog.RemoveImageDialog(linked_containers, image, window);
+            Sdk.Docker.Model.ContainerCollection containers = this.repository.containers().find_by_images(images);
+            
+            var dialog = new View.Docker.Dialog.RemoveImagesDialog(images, containers, window);
 
             dialog.response.connect((source, response_id) => {
 
                 switch (response_id) {
                     case Gtk.ResponseType.APPLY:
-
                         try {
-
-                            if (linked_containers.size > 0) {
+                            if (containers.size > 0) {
                                 foreach(Sdk.Docker.Model.ContainerStatus status in Sdk.Docker.Model.ContainerStatus.all()) {
-                                    foreach(Sdk.Docker.Model.Container container in linked_containers.get_by_status(status)) {
+                                    foreach(Sdk.Docker.Model.Container container in containers.get_by_status(status)) {
                                         this.repository.containers().remove(container, true);
+                                        message_dispatcher.dispatch(Gtk.MessageType.INFO, "Container %s successfully removed".printf(container.name));
                                     }
                                 }
                             }
+                            
+                            foreach (Sdk.Docker.Model.Image image in images) {
+                                this.repository.images().remove(image, true);
+                                message_dispatcher.dispatch(Gtk.MessageType.INFO, "Image %s successfully removed".printf(image.name));
+                            }
 
-                            this.repository.images().remove(image, true);
-                            message_dispatcher.dispatch(Gtk.MessageType.INFO, "Image %s successfully removed".printf(image.name));
+                            message_dispatcher.dispatch(Gtk.MessageType.INFO, "All images and containers being used successfully removed");
 
                         } catch (Sdk.Docker.Io.RequestError e) {
                             message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) e.message);
@@ -194,7 +199,6 @@ public class ApplicationController : GLib.Object {
 
                         this.init_container_list();
                         this.init_image_list();
-                        dialog.destroy();
 
                         break;
                     case Gtk.ResponseType.CANCEL:
@@ -300,27 +304,27 @@ public class ApplicationController : GLib.Object {
 
         view.headerbar.pull_image_from_docker_hub.connect((target, image) => {
 
-			var decorator = new View.Docker.Decorator.CreateImageDecorator(target.message_box_label);
-			var future_response = repository.images().future_pull(image);
+            var decorator = new View.Docker.Decorator.CreateImageDecorator(target.message_box_label);
+            var future_response = repository.images().future_pull(image);
 
-			future_response.on_payload_line_received.connect((line) => {
+            future_response.on_payload_line_received.connect((line) => {
 
-				if (null != line) {
-					try {
-						decorator.update(line);
-					} catch (Error e) {
-						message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) e.message);
-					}
-				}
-			});
-			
-			future_response.on_finished.connect(() => {
-				try {
-					decorator.update(null);
-				} catch (Error e) {
-					message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) e.message);
-				}
-			});
+                if (null != line) {
+                    try {
+                        decorator.update(line);
+                    } catch (Error e) {
+                        message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) e.message);
+                    }
+                }
+            });
+
+            future_response.on_finished.connect(() => {
+                try {
+                    decorator.update(null);
+                } catch (Error e) {
+                    message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) e.message);
+                }
+            });
 
         });
     }
@@ -328,7 +332,7 @@ public class ApplicationController : GLib.Object {
     protected void init_image_list() throws Sdk.Docker.Io.RequestError {
         Sdk.Docker.Model.ImageCollection images = new Sdk.Docker.Model.ImageCollection();
         try {
-             images = repository.images().list();
+            images = repository.images().list();
         } catch (Sdk.Docker.Io.RequestError e) {
             message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) e.message);
         } finally {
@@ -351,20 +355,20 @@ public class ApplicationController : GLib.Object {
     protected bool __connect(string docker_endpoint) throws Error {
 
         repository = create_repository(docker_endpoint);
-		
-		if (repository != null) {
-			
-			repository.connected.connect((repository) => {
-				docker_daemon_post_connect(docker_endpoint);
-			});
+        
+        if (repository != null) {
+            
+            repository.connected.connect((repository) => {
+                docker_daemon_post_connect(docker_endpoint);
+            });
 
-			repository.connect();
+            repository.connect();
 
-			return true;
-		}
-		
-		return false;
-		
+            return true;
+        }
+        
+        return false;
+        
     }
 
      protected bool __disconnect() {
@@ -389,14 +393,14 @@ public class ApplicationController : GLib.Object {
     protected Sdk.Docker.Repository? create_repository(string uri) {
 
         Sdk.Docker.Client? client = Sdk.Docker.ClientFactory.create_from_uri(uri);
-		
-		if (client != null) {
-			return new Sdk.Docker.Repository(client);
-		}
-		
-		message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) "Failed to connect to %s".printf(uri));
-		
-		return null;
+        
+        if (client != null) {
+            return new Sdk.Docker.Repository(client);
+        }
+        
+        message_dispatcher.dispatch(Gtk.MessageType.ERROR, (string) "Failed to connect to %s".printf(uri));
+        
+        return null;
         
     }
 

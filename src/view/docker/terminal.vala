@@ -47,8 +47,8 @@ namespace View.Docker {
             #if LIBVTE_2.90
             ,null
             #endif
-			);
-			
+            );
+            
             return pid;
         }
 

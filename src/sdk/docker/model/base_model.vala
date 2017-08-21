@@ -1,9 +1,9 @@
 namespace Sdk.Docker.Model {
 
     /**
-     * Base model
+     * BaseModel model
      */
-    public class Model : GLib.Object {
+    public class BaseModel : GLib.Object {
         private string _id;
         private string _full_id;
 

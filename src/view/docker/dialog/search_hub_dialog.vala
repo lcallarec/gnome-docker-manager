@@ -10,8 +10,8 @@ namespace View.Docker.Dialog {
         private Gtk.ListStore liststore = new Gtk.ListStore(5, typeof (string),  typeof (string), typeof (string), typeof (string), typeof (string));
         private Gtk.TreeView treeview   = null;
         private Gtk.Box message_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
-		public Gtk.Label message_box_label = new Gtk.Label(null);
-		
+        public Gtk.Label message_box_label = new Gtk.Label(null);
+        
         public SearchHubDialog(Gtk.Window parent) {
 
             base(600, 500, "Search image in Docker hub", parent, false, 0);
@@ -26,11 +26,11 @@ namespace View.Docker.Dialog {
             search_entry.width_chars = 30;
             search_entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "edit-find-symbolic");
 
-			message_box_label.set_alignment(0,0);
-			message_box_label.wrap = true;
-			message_box_label.wrap_mode = Pango.WrapMode.WORD_CHAR;
-			
-			message_box.pack_start(message_box_label, true, true, 0);			
+            message_box_label.set_alignment(0,0);
+            message_box_label.wrap = true;
+            message_box_label.wrap_mode = Pango.WrapMode.WORD_CHAR;
+            
+            message_box.pack_start(message_box_label, true, true, 0);            
 
             body.pack_start(search_entry, false, false, 5);
             body.pack_start(scrolled_window, false, true, 5);
@@ -120,7 +120,7 @@ namespace View.Docker.Dialog {
                         this.pull_image_from_docker_hub(this, image);
                     });
 
-                    return false;
+                    return true;
                 }
 
                 return false;

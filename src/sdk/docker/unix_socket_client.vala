@@ -10,15 +10,15 @@ namespace Sdk.Docker {
             this.uri = socket_uri;
         }
 
-		public override bool supportUri() {
-			return uri.has_prefix("unix://");
-		}
+        public override bool supportUri() {
+            return uri.has_prefix("unix://");
+        }
 
         /**
          * Send a message to docker daemon and return the response
          */
         public override Io.Response send(string method, string endpoint, string? body = null) throws Io.RequestError {
-	
+    
             StringBuilder request_builder = new StringBuilder("%s %s".printf(method, endpoint));
             
             request_builder.append(UnixSocketClient.HTTP_METHOD_HEADER_SUFFIX);
@@ -54,7 +54,7 @@ namespace Sdk.Docker {
             return response;
         }
 
-		/**
+        /**
          * Send a message to docker daemon and return the response
          */
         public override Io.FutureResponse future_send(string method, string endpoint, string? body = null) throws Io.RequestError {
@@ -75,23 +75,23 @@ namespace Sdk.Docker {
             request_builder.append("\r\n");
 
             string query = request_builder.str;
-			
-			Io.FutureResponse future_response = new Io.FutureResponse();
-			
-			GLib.Thread<int> thread = new GLib.Thread<int>("future_send", () => {
-				var conn = this.create_connection();
+            
+            Io.FutureResponse future_response = new Io.FutureResponse();
+            
+            GLib.Thread<int> thread = new GLib.Thread<int>("future_send", () => {
+                var conn = this.create_connection();
 
-				try {
-					conn.output_stream.write(query.data);
-				} catch(GLib.IOError e) {
-					this.request_error(query);
-					string err_message = "IO error : %s".printf(e.message);
-					throw new Io.RequestError.FATAL(err_message);
-				}
-				
-				Io.SocketResponseFactory.future_create(new DataInputStream(conn.input_stream), future_response);
-				return 0;
-			});
+                try {
+                    conn.output_stream.write(query.data);
+                } catch(GLib.IOError e) {
+                    this.request_error(query);
+                    string err_message = "IO error : %s".printf(e.message);
+                    throw new Io.RequestError.FATAL(err_message);
+                }
+                
+                Io.SocketResponseFactory.future_create(new DataInputStream(conn.input_stream), future_response);
+                return 0;
+            });
 
             return future_response;
         }
@@ -101,11 +101,11 @@ namespace Sdk.Docker {
          */
         private SocketConnection? create_connection() throws Io.RequestError {
             try {
-				
-				var url = Dockery.Convert.Uri.get_url_from_uri(this.uri);
+                
+                var url = Dockery.Convert.Uri.get_url_from_uri(this.uri);
                 return this.client.connect(
-					new UnixSocketAddress(url)
-				);
+                    new UnixSocketAddress(url)
+                );
                 
             } catch (GLib.Error e) {
                 this.request_error(e.message);

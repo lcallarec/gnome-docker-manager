@@ -25,7 +25,7 @@ namespace View.Docker.List {
             if (containers.is_empty) {
 
                 this.notebook = null;
-				this.empty_box = IconMessageBoxBuilder.create_icon_message_box("No container found", "docker-symbolic")	;			
+                this.empty_box = IconMessageBoxBuilder.create_icon_message_box("No container found", "docker-symbolic")    ;            
                 
                 this.pack_start(this.empty_box, true, true, 0);
 
@@ -34,37 +34,37 @@ namespace View.Docker.List {
                 }
 
             } else {
-			
-				this.empty_box = null;
-				this.notebook  = new Gtk.Notebook();
+            
+                this.empty_box = null;
+                this.notebook  = new Gtk.Notebook();
 
-				this.pack_start(this.notebook, true, true, 0);
+                this.pack_start(this.notebook, true, true, 0);
 
-				int page_count = 0;
-				foreach(ContainerStatus status in ContainerStatus.all()) {
-					var c = containers.get_by_status(status);
-					if (c.is_empty == false) {
-						page_count++;
-						this.hydrate(status, c);
-					}
-				}
+                int page_count = 0;
+                foreach(ContainerStatus status in ContainerStatus.all()) {
+                    var c = containers.get_by_status(status);
+                    if (c.is_empty == false) {
+                        page_count++;
+                        this.hydrate(status, c);
+                    }
+                }
 
-				notebook.switch_page.connect((page, page_num) => {
-					user_actions.set_feature(UserActionsTarget.CURRENT_CONTAINER_NOTEBOOK_PAGE, page_num.to_string());
-				});
+                notebook.switch_page.connect((page, page_num) => {
+                    user_actions.set_feature(UserActionsTarget.CURRENT_CONTAINER_NOTEBOOK_PAGE, page_num.to_string());
+                });
 
-				if (true == show_after_refresh) {
-					this.show_all();
+                if (true == show_after_refresh) {
+                    this.show_all();
 
-					int current_page = user_actions.get_feature(UserActionsTarget.CURRENT_CONTAINER_NOTEBOOK_PAGE).to_int();
-					if (current_page + 1 > page_count) {
-						//-1 = last page
-						current_page = -1;
-					}
-					//This code should remain after show_all() invokation, because set_current_page will have no effets if the page is not shown yet
-					notebook.set_current_page(current_page);
-				}
-			}
+                    int current_page = user_actions.get_feature(UserActionsTarget.CURRENT_CONTAINER_NOTEBOOK_PAGE).to_int();
+                    if (current_page + 1 > page_count) {
+                        //-1 = last page
+                        current_page = -1;
+                    }
+                    //This code should remain after show_all() invokation, because set_current_page will have no effets if the page is not shown yet
+                    notebook.set_current_page(current_page);
+                }
+            }
 
             return this;
         }

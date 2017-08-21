@@ -234,7 +234,7 @@ namespace Sdk.Docker {
         }
 
         /**
-         * Rename a single container
+         * Get containers that were created from the given image
          *
          * See [[https://docs.docker.com/engine/reference/api/docker_remote_api_v1.21/#list-containers]]
          */
@@ -258,8 +258,29 @@ namespace Sdk.Docker {
                 return container_collection;
 
             } catch (Io.RequestError e) {
-                throw new Io.RequestError.FATAL("Error while fetching containers by image %s (%s)".printf(image.id, e.message));
+                throw new Io.RequestError.FATAL("Error while fetching containers by image (%s)".printf(e.message));
             }
+        }
+        
+        /**
+         * Get containers that were created from the given images
+         *
+         * See [[https://docs.docker.com/engine/reference/api/docker_remote_api_v1.21/#list-containers]]
+         */
+        public Model.ContainerCollection find_by_images(Sdk.Docker.Model.ImageCollection images) throws Io.RequestError {
+
+            Model.ContainerCollection containers = new Model.ContainerCollection();
+            
+            try {
+                foreach(Model.Image image in images) {
+                    containers.add_collection(this.find_by_image(image));
+                }
+
+            } catch (Io.RequestError e) {
+                throw new Io.RequestError.FATAL("Error while fetching containers for images [%s](%s)".printf(string.join(", ", containers.get_ids()), e.message));
+            }
+            
+            return containers;
         }
 
         /**

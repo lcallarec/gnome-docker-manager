@@ -6,7 +6,7 @@ namespace View {
     public class Dialog : Gtk.Dialog {
         
         construct {
-            this.border_width = 5;
+            this.border_width = 0;
         }
         
         public Dialog(int width, int height, string title, Gtk.Window parent, bool is_modal = true, int use_header_bar = 1) {

@@ -1,14 +1,12 @@
 namespace Sdk.Docker.Model {
-
+    
+    using global::Sdk.Docker.Model;
+    
     public class Collection<T> : Gee.ArrayList<T> {
 
         private Gee.HashMap<string, T> id_idx = new  Gee.HashMap<string, T>();
 
-        public Collection() {
-
-        }
-
-        public new void add(Model item) {
+        public new void add(BaseModel item) {
             id_idx.set(item.id, item);
             base.add(item);
         }
@@ -19,6 +17,26 @@ namespace Sdk.Docker.Model {
 
         public bool has_id(string id) {
             return id_idx.has_key(id);
+        }
+        
+        /**
+         * Get an array of id 
+         */ 
+        public string[] get_ids() {
+            string[] ids = new string[0];
+            foreach (string id in id_idx.keys) {
+                ids += id;
+            }
+            
+            return ids;
+        }
+        
+        public T? first() {
+            if (iterator().has_next()) {
+                return iterator().next();
+            }
+            
+            return null;
         }
 
     }

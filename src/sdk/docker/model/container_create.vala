@@ -3,7 +3,7 @@ namespace Sdk.Docker.Model {
     /**
      * ContainerCreate is a domain used used when a container creation is requested
      */
-    public class ContainerCreate : Model, Serializable {
+    public class ContainerCreate : BaseModel, Serializable {
 
         public Image image {get; construct set;}
 

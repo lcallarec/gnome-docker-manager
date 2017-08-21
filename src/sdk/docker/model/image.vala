@@ -3,7 +3,7 @@ namespace Sdk.Docker.Model {
     /**
      * Image model
      */
-    public class Image : Model {
+    public class Image : BaseModel {
 
         private uint _raw_size;
         private string _size;

@@ -6,24 +6,30 @@ namespace View.Docker.List {
 
         protected Gtk.Box empty_box;
 
-        protected Gtk.ListStore liststore = new Gtk.ListStore(4, typeof (string),  typeof (string), typeof (string), typeof (string));
+        protected Gtk.ListStore liststore;
+
+        protected ImageCollection images;
 
         /**
          * Init the images view from a given collection of images
          */
         public Images init(ImageCollection images, bool show_after_refresh = true) {
 
+            liststore = new Gtk.ListStore(4, typeof (string),  typeof (string), typeof (string), typeof (string));
+
+            this.images = images;
+
             this.flush();
 
             if (images.size > 0) {
-                this.hydrate(images);
+                this.hydrate();
             } else {
                 var empty_box = IconMessageBoxBuilder.create_icon_message_box("No image found", "docker-symbolic");
                 this.pack_start(empty_box, true, true, 0);
             }
 
             if (show_after_refresh == true) {
-				this.show_all();
+                this.show_all();
             }
             
             return this;
@@ -51,14 +57,14 @@ namespace View.Docker.List {
         /**
          * Add new rows from images array
          */
-        private int hydrate(ImageCollection images) {
+        private int hydrate() {
             int images_count = 0;
 
             Gtk.TreeIter iter;
 
             liststore.clear();
 
-            foreach(Image image in images) {
+            foreach(Image image in this.images) {
 
                 liststore.append(out iter);
 
@@ -73,44 +79,67 @@ namespace View.Docker.List {
 
             var tv = get_treeview(liststore);
 
+            register_on_row_right_click(tv);
+
+            this.pack_start(tv, true, true, 0);
+
+            return images_count;
+        }
+        
+        private void register_on_row_right_click(Gtk.TreeView tv) {
+            
             var selection = tv.get_selection();
-            selection.set_mode(Gtk.SelectionMode.SINGLE);
+            selection.set_mode(Gtk.SelectionMode.MULTIPLE);
 
             tv.button_press_event.connect((e) => {
                 if (e.button == 3) {
-                    Gtk.TreePath tp;
-                    tv.get_path_at_pos((int) e.x, (int) e.y, out tp, null, null, null);
+                   
+                    Gtk.TreeModel model;
+                    
+                    GLib.List<Gtk.TreePath> rows = selection.get_selected_rows(out model);
+                    
+                    string row_value;
+                    if (rows.length() == 1) {
+                        
+                        Image? image = get_image_from_row(model, rows.nth_data(0));
+                        
+                        if (null != image) {
+                            
+                            View.Docker.Menu.ImageMenu menu = View.Docker.Menu.ImageMenuFactory.create_single(image);
+                            menu.show_all();
 
-                    selection.select_path(tp);
+                            menu.popup(null, null, null, e.button, e.time);
 
-                    Gtk.TreeModel m;
-                    Gtk.TreeIter i;
-                    selection.get_selected(out m, out i);
+                            menu.images_remove_request.connect(() => {
+                                this.images_remove_request(new ImageCollection.from_model(image));
+                            });
 
-                    Value oid;
-                    m.get_value(i, 1, out oid);
+                            menu.image_create_container_request.connect(() => {
+                                this.image_create_container_request(image);
+                            });
+                                
+                            menu.image_create_container_with_request.connect(() => {
+                                this.image_create_container_with_request(image);
+                            });
+                        }
 
-                    string id = oid as string;
+                    } else {
 
-                    if (images.has_id(id)) {
+                        var selected_images = new Sdk.Docker.Model.ImageCollection();
+                        for (int i = 0; i < rows.length(); i++) {
+                            Image? selected_image = get_image_from_row(model, rows.nth_data(i));
+                            if (null != selected_image) {
+                                selected_images.add(selected_image);
+                            }
+                        }
 
-                        Image image = images.get_by_id(id);
-
-                        View.Docker.Menu.ImageMenu menu = View.Docker.Menu.ImageMenuFactory.create(image);
+                        View.Docker.Menu.ImageMenu menu = View.Docker.Menu.ImageMenuFactory.create_multi(selected_images);
                         menu.show_all();
 
                         menu.popup(null, null, null, e.button, e.time);
-
-                        menu.image_remove_request.connect(() => {
-                            this.image_remove_request(image);
-                        });
-
-                        menu.image_create_container_request.connect(() => {
-                            this.image_create_container_request(image);
-                        });
-
-                        menu.image_create_container_with_request.connect(() => {
-                            this.image_create_container_with_request(image);
+                        
+                        menu.images_remove_request.connect(() => {
+                            this.images_remove_request(selected_images);
                         });
                     }
 
@@ -119,10 +148,22 @@ namespace View.Docker.List {
 
                 return false;
             });
+        }
+        
+        private Image? get_image_from_row(Gtk.TreeModel model, Gtk.TreePath tree_path) {
+            Gtk.TreeIter iter;
+            Value value;
+            
+            model.get_iter(out iter, tree_path) ;
+            model.get_value(iter, 1, out value);
 
-            this.pack_start(tv, true, true, 0);
-
-            return images_count;
+            string id = value as string;
+            
+            if (this.images.has_id(id)) {
+                return this.images.get_by_id(id);            
+            }
+            
+            return null;
         }
     }
 }

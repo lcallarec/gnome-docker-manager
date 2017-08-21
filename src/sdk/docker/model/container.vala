@@ -3,7 +3,7 @@ namespace Sdk.Docker.Model {
     /**
      * Container model
      */
-    public class Container : Model, Validatable {
+    public class Container : BaseModel, Validatable {
 
         /** attribute for name properties */
         private string[] _names;

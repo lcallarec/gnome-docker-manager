@@ -56,5 +56,20 @@ namespace View.Docker {
             return box;
         }
 
+        public static Gtk.Box create_icon_box(string icon_name) {
+
+            var image = new Gtk.Image.from_icon_name(icon_name, Gtk.IconSize.DIALOG);
+
+            image.pixel_size = 164;
+            image.opacity = 0.2;
+
+            var box = new Gtk.HBox(false, 0);
+
+            box.valign = Gtk.Align.CENTER;
+            box.pack_start(image, true, false, 0);
+
+            return box;
+        }
+
     }
 }
