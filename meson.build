@@ -26,7 +26,9 @@ endif
 
 if get_option('travis') == false
   vala_args += ['-D', 'NOT_ON_TRAVIS']
-else
+endif
+
+if get_option('debug') == true
   vala_args += ['--ccode', '--debug']
 endif
 
