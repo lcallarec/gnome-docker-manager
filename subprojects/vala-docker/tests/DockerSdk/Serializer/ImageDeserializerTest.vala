@@ -48,25 +48,25 @@ private void register_image_deserializer_test() {
         }
     });
 
-    Test.add_func ("/Dockery/DockerSdk/Serializer/ImageDeserializer/deserialize#NoErrorsWhenEmptyRepoTags", () => {
-        var deserializer = new Serializer.ImageDeserializer();
-        try {
-          deserializer.deserialize(one_complete_json_image_with_empty_repotags());
-        } catch (Error e) {
-          assert_not_reached();
-        }
-    });
+    //  Test.add_func ("/Dockery/DockerSdk/Serializer/ImageDeserializer/deserialize#NoErrorsWhenEmptyRepoTags", () => {
+    //      var deserializer = new Serializer.ImageDeserializer();
+    //      try {
+    //        deserializer.deserialize(one_complete_json_image_with_empty_repotags());
+    //      } catch (Error e) {
+    //        assert_not_reached();
+    //      }
+    //  });
 
 
-    Test.add_func ("/Dockery/DockerSdk/Serializer/ImageDeserializer/deserialize#NoErrorsWhenNullRepoTags", () => {
-        var deserializer = new Serializer.ImageDeserializer();
+    //  Test.add_func ("/Dockery/DockerSdk/Serializer/ImageDeserializer/deserialize#NoErrorsWhenNullRepoTags", () => {
+    //      var deserializer = new Serializer.ImageDeserializer();
 
-        try {
-         deserializer.deserialize(one_complete_json_image_with_null_repotags());
-        } catch (Error e) {
-          assert_not_reached();
-        }
-    });   
+    //      try {
+    //       deserializer.deserialize(one_complete_json_image_with_null_repotags());
+    //      } catch (Error e) {
+    //        assert_not_reached();
+    //      }
+    //  });   
 }
 
 internal string one_complete_json_image() {
